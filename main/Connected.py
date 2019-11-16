@@ -10,12 +10,18 @@ class Connected:
         self.__TRUE_CODE = 200
         return
 
+    """
+        Функция возвращает токен сессии
+    """
     def getToken(self):
         if 'csrftoken' in self.__session.cookies:
             return self.__session.cookies['csrftoken']
         else:
             return self.__session.cookies['csrf']
 
+    """
+        Функция авторизации пользователя на сайте
+    """
     def authorization(self):
         URL = 'https://leetcode.com/accounts/login/'
         self.__session.get(URL)
@@ -24,9 +30,15 @@ class Connected:
         response = self.__session.post(URL, data=login_data, headers=dict(Referer=URL))
         print("User Authorization Status:", response.status_code)
 
+    """
+        Функция возвращает cua - закодированное название клиента и браузера
+    """
     def getCAU(self, URL):
         return self.__session.get(URL, cookies=browser_cookie3.chrome()).cookies.values()[0]
 
+    """
+        Функция возвращает куки
+    """
     def getCookies(self, csrftoken):
         __cfduid = '__cfduid=' + self.__session.cookies.values()[1]
         token = 'csrftoken=' + csrftoken
@@ -34,6 +46,9 @@ class Connected:
         c_a_u = self.getCAU(str('https://leetcode.com/problems/'+self.__name_task+'/'))
         return str(__cfduid+'; '+token+'; '+LEETCODE_SESSION+'; '+c_a_u)
 
+    """
+        Функция возвращает хедер
+    """
     def getHeaders(self):
         csrftoken = self.getToken()
         return {
@@ -55,6 +70,10 @@ class Connected:
                 'x-csrftoken': csrftoken
         }
 
+    """
+        Функция отправляет на сервер решенние в виде json и, если решение правильное,
+        получает id ответа, через который достает с сервера информацию об ответе
+    """
     def solve(self, decision_json, name_task):
         self.__name_task = name_task
         response = self.__session.post(str('https://leetcode.com/problems/'+name_task+'/submit/'), json=decision_json, headers=self.getHeaders())
