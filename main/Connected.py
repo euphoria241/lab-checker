@@ -71,10 +71,20 @@ class Connected:
         }
 
     """
+        Функция узнает и возващает backend id задачи
+    """
+    def getQuestionId(self, name_task):
+        req = {"operationName":"questionData","variables":{"titleSlug":name_task},"query":"query questionData($titleSlug: String!) {\n  question(titleSlug: $titleSlug) {\n    questionId\n    questionFrontendId\n    boundTopicId\n    title\n    titleSlug\n    content\n    translatedTitle\n    translatedContent\n    isPaidOnly\n    difficulty\n    likes\n    dislikes\n    isLiked\n    similarQuestions\n    contributors {\n      username\n      profileUrl\n      avatarUrl\n      __typename\n    }\n    langToValidPlayground\n    topicTags {\n      name\n      slug\n      translatedName\n      __typename\n    }\n    companyTagStats\n    codeSnippets {\n      lang\n      langSlug\n      code\n      __typename\n    }\n    stats\n    hints\n    solution {\n      id\n      canSeeDetail\n      __typename\n    }\n    status\n    sampleTestCase\n    metaData\n    judgerAvailable\n    judgeType\n    mysqlSchemas\n    enableRunCode\n    enableTestMode\n    envInfo\n    libraryUrl\n    __typename\n  }\n}\n"}
+        response = self.__session.post("https://leetcode.com/graphql", json=req, headers=dict(Referer="https://leetcode.com/graphql"))
+        if response.status_code != self.__TRUE_CODE: return
+        return response.json()["data"]["question"]["questionId"]
+
+    """
         Функция отправляет на сервер решенние в виде json и, если решение правильное,
         получает id ответа, через который достает с сервера информацию об ответе
     """
     def solve(self, decision_json, name_task):
+        decision_json["question_id"] = self.getQuestionId(name_task)
         self.__name_task = name_task
         response = self.__session.post(str('https://leetcode.com/problems/'+name_task+'/submit/'), json=decision_json, headers=self.getHeaders())
         print("\nTask", name_task, "Transfer Status:", response.status_code)
