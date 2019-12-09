@@ -1,3 +1,4 @@
 Шафиев add-digits
+Рязанов add-digits
 Пупкин defanging-an-ip-address
 Иванов to-lower-case
