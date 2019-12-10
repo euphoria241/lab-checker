@@ -4,11 +4,11 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
 
 
-class WindowError(QMainWindow):
+class WindowError(QWidget):
 
     def __init__(self, application, error):
         # Обязательно нужно вызвать метод супер класса
-        QMainWindow.__init__(self)
+        super().__init__()
         self.application = application
         self.title = 'Window Error'
         self.error = error

@@ -28,6 +28,7 @@ class Connected:
         self.__URL_header = "https://leetcode.com/graphql"
         self.__URL_git = ""
         self.__URL_git_session = "https://github.com/session"
+        self.__URL_git_verification = ""
         return
 
     """
@@ -102,12 +103,19 @@ class Connected:
         soup = bs.BeautifulSoup(sauce, "html.parser")
         div = soup.find_all('div')
         incorrect = True
+        verification = False
         for element in div:
-            if element.get('class') is not None and element.get('class')[0] == 'container':
-                if element.getText().find('Incorrect username or password.') > 0:
-                    incorrect = False
-                    break
-        return response.status_code, incorrect
+            if element.get('class') is not None:
+                if element.get('class')[0] == 'container':
+                    if element.getText().find('Incorrect username or password.') > 0:
+                        incorrect = False
+                        break
+                elif element.get('class')[0] == 'two-factor-help':
+                    if element.getText().find('t*************@mail.ru') > 0:
+                        verification = True
+                        print(response.text)
+                        break
+        return response.status_code, incorrect, verification
 
     """
         Функция возвращает cua - закодированное название клиента и браузера
@@ -191,33 +199,42 @@ class Connected:
                 break
         self.progressBarWakeUp()
         solve_dict = dict()
+        solve_dict['status_msg'] = response_json['status_msg']
+        solve_dict['status_runtime'] = response_json['status_runtime']
+        solve_dict['status_memory'] = response_json['status_memory']
+        if response_json['status_msg'] == 'Wrong Answer':
+            solve_dict['input'] = response_json['input']
+            solve_dict['code_output'] = response_json['code_output']
+            solve_dict['expected_output'] = response_json['expected_output']
+        else:
+            solve_dict['input'] = ''
+            solve_dict['code_output'] = ''
+            solve_dict['expected_output'] = ''
         if not response_json['run_success']:
             solve_dict['full_compile_error'] = response_json['full_compile_error']
         else:
             solve_dict['full_compile_error'] = ''
-        if response_json['status_msg'] == 'Wrong Answer':
-            solve_dict['code_output'] = response_json['code_output']
-            solve_dict['input'] = response_json['input']
-            solve_dict['expected_output'] = response_json['expected_output']
-        else:
-            solve_dict['code_output'] = ''
-            solve_dict['input'] = ''
-            solve_dict['expected_output'] = ''
-        solve_dict['status_runtime'] = response_json['status_runtime']
-        solve_dict['status_memory'] = response_json['status_memory']
-        solve_dict['status_msg'] = response_json['status_msg']
         self.progressBarWakeUp()
+        QTimer.singleShot(0, self.startLoop2)
+        qApp.processEvents()
         if self.pbar.value() == self.pbar.maximum():
             self.pbar.reset()
         return solve_dict
 
-    def setPbar(self, pbar):
+    def setPbar(self, pbar, pbar2, size):
         self.pbar = pbar
+        self.pbar2 = pbar2
+        self.size = 100 // size
 
     def startLoop(self):
         time.sleep(0.05)
         value = self.pbar.value() + 20
         self.pbar.setValue(value)
+
+    def startLoop2(self):
+        time.sleep(0.05)
+        value = self.pbar2.value() + self.size
+        self.pbar2.setValue(value)
 
     def progressBarWakeUp(self):
         QTimer.singleShot(0, self.startLoop)

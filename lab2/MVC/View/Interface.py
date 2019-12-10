@@ -1,8 +1,13 @@
 import sys
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
 from MVC.View.FileOpener import FileOpener
-from MVC.View.MainWindow import MainWindow
+from MVC.View.VerificationWindow import VerificationWindow
 from MVC.View.WindowError import WindowError
+from MVC.View.Tabs import Tabs
+from MVC.View.Insets import Insets
 from MVC.Controller.Controller import Controller
 
 class Interface(QWidget):
@@ -16,9 +21,6 @@ class Interface(QWidget):
         self.ifOpenFilesOfStudents = False
         self.fileOpener = FileOpener()
         # Создание окна с фиксированной длинной 600
-        self.resize(800, 600)
-        # self.w.setMaximumWidth(800)
-        self.setWindowTitle('Проверка решений v0.142')
 
         self.str1 = QLabel('Выберите базу данных студентов', self)
 
@@ -44,7 +46,7 @@ class Interface(QWidget):
         self.start.setDisabled(True)
 
         # Таблица
-        self.mw = MainWindow()
+        self.mw = Tabs()
         self.mw.setMinimumWidth(600)
 
         self.txtArea = QPlainTextEdit()
@@ -54,7 +56,14 @@ class Interface(QWidget):
         self.pbar = QProgressBar(self)
         self.pbar.setMinimumWidth(600)
 
-        self.strPbar1 = QLabel('Обработано задач: 0 из 0', self)
+        self.pbar2 = QProgressBar(self)
+        self.pbar2.setMinimumWidth(600)
+
+        # self.strPbar1 = QLabel('Обработано задач: 0 из 0', self)
+        self.tabs_area = Insets(self.mw, self.txtArea)
+
+
+        self.enabledElement = [self.start, self.btn1, self.btn2, self.tabs_area]
 
         self.box = QGridLayout(self)
         self.box.addWidget(self.str1, 0, 0)
@@ -63,18 +72,19 @@ class Interface(QWidget):
         self.box.addWidget(self.line2, 3, 0)
         self.box.addWidget(self.btn1, 1, 1)
         self.box.addWidget(self.btn2, 3, 1)
-        self.box.addWidget(self.mw, 5, 0)
-        self.mw.hide()
-        self.box.addWidget(self.txtArea, 5, 0)
-        self.box.addWidget(self.start, 6, 1)
-        self.box.addWidget(self.pbar, 4, 0)
-        self.box.addWidget(self.strPbar1, 4, 1)
-        self.show()
+        self.box.addWidget(self.pbar2, 4, 0)
+        self.box.addWidget(self.pbar, 5, 0)
+        self.box.addWidget(self.tabs_area, 6, 0)
+        # self.box.addWidget(self.mw, 6, 0)
+        # self.box.addWidget(self.txtArea, 6, 0)
+        self.box.addWidget(self.start, 7, 1)
+        self.pbar.hide()
+        self.pbar2.hide()
+        # self.box.addWidget(self.strPbar1, 4, 1)
+
+        # self.show()
 
     def click_btn1(self):
-        if not self.txtArea.isVisible():
-            self.txtArea.show()
-            self.mw.hide()
         fileName = self.fileOpener.openFileNameDialog()
         if fileName != '':
             self.line1.setText(fileName)
@@ -84,9 +94,6 @@ class Interface(QWidget):
                 self.start.setEnabled(True)
 
     def click_btn2(self):
-        if not self.txtArea.isVisible():
-            self.txtArea.show()
-            self.mw.hide()
         fileNames = self.fileOpener.openFileNamesDialog()
         if len(fileNames) != 0:
             self.txtArea.appendPlainText("Загружены файлы для проверки:")
@@ -101,34 +108,43 @@ class Interface(QWidget):
 
     def gettingStarted(self):
         self.pbar.show()
-        self.strPbar1.setStyleSheet("QLabel {background-color:yellow}")
-        decisions, name_students = s.checkDecisions(self.pbar, self.strPbar1)
-        self.strPbar1.setText('Формирование таблицы')
-        self.mw.setRowsTable(decisions, name_students, self.pbar)
-        self.strPbar1.setText('Обработка завершена')
-        self.strPbar1.setStyleSheet("QLabel {background-color:rgb(240,240,240)}")
-        self.txtArea.hide()
-        self.mw.show()
-        # self.pbar.hide()
-
-    def isTable(self):
-        if not self.txtArea.isVisible():
-            self.mw.hide()
-            self.txtArea.show()
-            self.mw = MainWindow()
-            self.mw.hide()
-            self.mw.setMinimumWidth(600)
-            self.box.addWidget(self.mw, 5, 0)
+        self.pbar2.show()
+        self.enabledElements(False)
+        # self.strPbar1.setStyleSheet("QLabel {background-color:yellow}")
+        s = Controller()
+        decisions, name_students = s.checkDecisions(self.pbar, self.pbar2)
+        # self.strPbar1.setText('Формирование таблицы')
+        self.mw.setRowsTable(decisions, name_students, self.pbar, self.pbar2)
+        # self.strPbar1.setText('Обработка завершена')
+        # self.strPbar1.setStyleSheet("QLabel {background-color:rgb(240,240,240)}")
+        self.enabledElements(True)
+        self.pbar.hide()
+        self.pbar2.hide()
+        print(123)
+        s.addedTable()
+        print(213)
 
     def openWindowError(self, error):
         WindowError(self.application, error)
 
+    def enabledElements(self, boolean):
+        for element in self.enabledElement:
+            element.setEnabled(boolean)
 
+    def click_save(self):
+        self.fileOpener.openFileSave()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    app.setStyle('Fusion')
-    ex = Interface(app)
-    s = Controller()
-    s.initController(ex)
-    sys.exit(app.exec_())
+    def setSaveAction(self, saveAction):
+        self.saveAction = saveAction
+        self.saveAction.setDisabled(True)
+        self.enabledElement.append(saveAction)
+
+    def clearTable(self):
+        s = Controller()
+        s.clearDataTable()
+        self.mw = Tabs()
+        self.mw.setMinimumWidth(600)
+        self.tabs_area.updateTable(self.mw)
+        # self.tabs_area = Insets(self.mw, self.txtArea)
+        # self.box.addWidget(self.tabs_area, 6, 0)
+        s.clearTable()

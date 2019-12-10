@@ -38,3 +38,12 @@ class FileOpener(QWidget):
             s = Controller()
             s.setArrayOfSolutions(fileNames)
         return fileNames
+
+    def openFileSave(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(self, "Проводник", "", "Text file (*.csv)",
+                                                  options=options)
+        if fileName:
+            s = Controller()
+            s.saveFile(fileName)
