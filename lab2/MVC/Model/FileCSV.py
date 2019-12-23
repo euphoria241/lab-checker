@@ -1,5 +1,6 @@
 import csv
 
+
 class FileCSV:
     def __init__(self):
         return
@@ -14,8 +15,9 @@ class FileCSV:
         keys = data[0].keys()
         i = 0
         pars = []
-        pars.append(["Студент", "Статус", "Время выполнения", "Память", "Input", "Output",
-                                                "Expected", "Error"])
+        pars.append(
+            ["Студент", "Время", "Статус", "Время выполнения", "Быстрее, чем", "Память", "Меньше, чем", "Входные",
+             "Выходные", "Ожидаемые", "Ошибка"])
         for element in data:
             p = [names[i]]
             for k in keys:

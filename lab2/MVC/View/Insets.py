@@ -14,8 +14,6 @@ class Insets(QtWidgets.QTabWidget):
         self.addTab(self.all_tabs[1], 'Таблица')
 
     def updateTable(self, mw):
-        index = self.currentIndex()
-        print(index)
-        self.removeTab(index)
+        self.removeTab(1)
         self.all_tabs[1] = mw
         self.addTab(self.all_tabs[1], 'Таблица')

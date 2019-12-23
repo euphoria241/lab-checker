@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import *
 from MVC.Controller.Controller import Controller
+import pyzipper
+
 
 class FileOpener(QWidget):
 
@@ -16,24 +18,30 @@ class FileOpener(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        #self.show()
+        # self.show()
 
     def openFileNameDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self, "Проводник", "", "Text file (*.txt)",
+        fileName, _ = QFileDialog.getOpenFileName(self, "Проводник", "", "Archive file (*.zip)",
                                                   options=options)
-
+        dict_students = dict()
+        with pyzipper.AESZipFile(fileName, 'r') as file:
+            file.pwd = b'567812'
+            with file.open('db.txt', 'r') as db:
+                for line in db:
+                    key, value = line.decode('utf_8_sig').split()
+                    dict_students[key] = value
         if fileName:
             s = Controller()
-            s.setDictStudents(fileName)
+            s.setDictStudents(dict_students)
         return fileName
 
     def openFileNamesDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileNames, _ = QFileDialog.getOpenFileNames(self, "Проводник", "", "Python files (*.py)",
-                                                  options=options)
+                                                    options=options)
         if fileNames:
             s = Controller()
             s.setArrayOfSolutions(fileNames)
@@ -42,7 +50,7 @@ class FileOpener(QWidget):
     def openFileSave(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self, "Проводник", "", "Text file (*.csv)",
+        fileName, _ = QFileDialog.getOpenFileName(self, "Проводник", "", "Table file (*.csv *.xlsx *.xls)",
                                                   options=options)
         if fileName:
             s = Controller()

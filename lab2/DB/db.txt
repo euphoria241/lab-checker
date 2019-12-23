@@ -1,4 +1,5 @@
-Шафиев add-digits
-Рязанов add-digits
-Пупкин defanging-an-ip-address
-Иванов to-lower-case
+﻿РязановНА add-digits
+ПупкинВА defanging-an-ip-address
+ИвановЖЕ to-lower-case
+ХасановаАА happy-number
+ШафиевАА add-digits

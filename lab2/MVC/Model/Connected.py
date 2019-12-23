@@ -1,3 +1,4 @@
+import datetime
 import time
 
 import requests
@@ -28,7 +29,8 @@ class Connected:
         self.__URL_header = "https://leetcode.com/graphql"
         self.__URL_git = ""
         self.__URL_git_session = "https://github.com/session"
-        self.__URL_git_verification = ""
+        self.__URL_git_verification = "https://github.com/sessions/verified-device"
+        self.__verify_authenticity_token = ''
         return
 
     """
@@ -113,7 +115,14 @@ class Connected:
                 elif element.get('class')[0] == 'two-factor-help':
                     if element.getText().find('t*************@mail.ru') > 0:
                         verification = True
-                        print(response.text)
+                        sauce = response.text
+                        soup = bs.BeautifulSoup(sauce, "html.parser")
+                        form = soup.find('form')
+                        inputs = form.find_all('input', type='hidden')
+                        for element in inputs:
+                            if element.get('name') == 'authenticity_token':
+                                self.__verify_authenticity_token = element.get('value')
+                        print(self.__verify_authenticity_token)
                         break
         return response.status_code, incorrect, verification
 
@@ -199,9 +208,18 @@ class Connected:
                 break
         self.progressBarWakeUp()
         solve_dict = dict()
+        solve_dict['time'] = datetime.datetime.strftime(datetime.datetime.now(), "%Y.%m.%d %H:%M:%S")
         solve_dict['status_msg'] = response_json['status_msg']
         solve_dict['status_runtime'] = response_json['status_runtime']
+        if response_json['status_msg'] == 'Accepted':
+            solve_dict['runtime_percentile'] = response_json['runtime_percentile']
+        else:
+            solve_dict['runtime_percentile'] = ''
         solve_dict['status_memory'] = response_json['status_memory']
+        if response_json['status_msg'] == 'Accepted':
+            solve_dict['memory_percentile'] = response_json['memory_percentile']
+        else:
+            solve_dict['memory_percentile'] = ''
         if response_json['status_msg'] == 'Wrong Answer':
             solve_dict['input'] = response_json['input']
             solve_dict['code_output'] = response_json['code_output']
@@ -239,3 +257,11 @@ class Connected:
     def progressBarWakeUp(self):
         QTimer.singleShot(0, self.startLoop)
         qApp.processEvents()
+
+    def verifyGit(self, code):
+        data = {
+            'utf8': '✓',
+            'authenticity_token': self.__verify_authenticity_token,
+            'otp': code
+        }
+        request = self.__session.post(self.__URL_git_verification, data=data, headers=dict(Refere=self.__URL_header))

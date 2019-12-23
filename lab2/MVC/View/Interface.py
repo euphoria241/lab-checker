@@ -1,7 +1,8 @@
 import sys
+import webbrowser
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import *
 from MVC.View.FileOpener import FileOpener
 from MVC.View.VerificationWindow import VerificationWindow
@@ -28,7 +29,7 @@ class Interface(QWidget):
         self.line1.setMinimumWidth(600)
         self.line1.setReadOnly(True)
 
-        self.btn1 = QPushButton('Open', self)
+        self.btn1 = QPushButton('Открыть', self)
         self.btn1.clicked.connect(self.click_btn1)
 
         self.str2 = QLabel('Выберите файл/файлы для проверки', self)
@@ -37,17 +38,18 @@ class Interface(QWidget):
         self.line2.setMinimumWidth(600)
         self.line2.setReadOnly(True)
 
-        self.btn2 = QPushButton('Open')
+        self.btn2 = QPushButton('Открыть')
         self.btn2.clicked.connect(self.click_btn2)
 
-        self.start = QPushButton('Start')
+        self.start = QPushButton('Старт')
         self.start.setMaximumWidth(200)
         self.start.clicked.connect(self.gettingStarted)
         self.start.setDisabled(True)
 
         # Таблица
         self.mw = Tabs()
-        self.mw.setMinimumWidth(600)
+        self.mw.setMinimumWidth(625)
+        self.mw.setMinimumHeight(300)
 
         self.txtArea = QPlainTextEdit()
         self.txtArea.setMinimumWidth(600)
@@ -120,9 +122,8 @@ class Interface(QWidget):
         self.enabledElements(True)
         self.pbar.hide()
         self.pbar2.hide()
-        print(123)
         s.addedTable()
-        print(213)
+        self.txtArea.appendPlainText('Данные заполнены в таблицу')
 
     def openWindowError(self, error):
         WindowError(self.application, error)
@@ -147,4 +148,16 @@ class Interface(QWidget):
         self.tabs_area.updateTable(self.mw)
         # self.tabs_area = Insets(self.mw, self.txtArea)
         # self.box.addWidget(self.tabs_area, 6, 0)
+        self.txtArea.appendPlainText('Данные таблицы удалены')
         s.clearTable()
+
+    def saveTableMessage(self):
+        self.txtArea.appendPlainText('Данные таблицы сохранены')
+
+    def authorizationMessage(self):
+        self.txtArea.appendPlainText('Авторизация прошла успешно')
+
+    def openLink(self):
+        webbrowser.open('https://docs.google.com/document/d/1QNqFb3p9rgCjwcEu0sOawpLccE6-7wgxaPWxfxkyPKU/edit?usp=sharing')
+
+

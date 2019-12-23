@@ -6,7 +6,7 @@ class VerificationWindow(QMainWindow):
 
     def __init__(self, controller, parent):
         # Обязательно нужно вызвать метод супер класса
-        super(VerificationWindow, self).__init__(parent)
+        super().__init__()
         self.controller = controller
         self.initUI()
 
@@ -19,6 +19,7 @@ class VerificationWindow(QMainWindow):
         self.setWindowTitle('Window Verification')
         self.btn = QPushButton('Open', self)
         self.btn.clicked.connect(self.click_btn)
+        self.line.returnPressed.connect(self.btn.click)
         q = QWidget(self)
         box = QGridLayout(self)
         box.addWidget(self.str, 0, 0)
